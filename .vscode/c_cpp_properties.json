@@ -1,0 +1,18 @@
+{
+  "configurations": [
+    {
+      "name": "Linux", // or your platform
+      "includePath": [
+        "${workspaceFolder}/**"
+      ],
+      "compilerArgs": [
+        "-include", "${workspaceFolder}/include/asm-generic/int-ll64.h",
+        "-include", "${workspaceFolder}/tools/include/nolibc/stdbool.h"
+      ],
+      "compilerPath": "/usr/bin/gcc", // optional but recommended
+      "cStandard": "c11", // or your standard
+      "cppStandard": "c++17"
+    }
+  ],
+  "version": 4
+}

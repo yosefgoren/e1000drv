@@ -1,0 +1,7 @@
+helko.ko
+Module.symvers
+*.order
+*.mod
+*.o
+*.cmd
+.vscode/settings.json
