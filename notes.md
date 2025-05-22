@@ -33,3 +33,6 @@ But I can still see `e1000` in list of kernel modules.
 I looked at it a bit and the datasheet was not detailed enough in terms of the functional interface offered to the CPU, so I found a (somewhat generic e1000) software manual which seems more detailed. It is an official document from intel and it says that it applies to the `82540EM` hardware specifically.
 
 ## Registering a linux network device
+So I asked GPT for an example of this, specifically a linux module source which registers a new network device that does nothing. And the example essentially compiles.
+
+After building it, and installing the module, I can see in `ip a` an entry for `yogonet0` which means it actually works.
