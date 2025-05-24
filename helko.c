@@ -1,13 +1,30 @@
-/* 
- * hello-1.c - The simplest kernel module. 
- */ 
-#include <linux/module.h> /* Needed by all modules */ 
-#include <linux/printk.h> /* Needed for pr_info() */ 
-
+#include <linux/module.h> 
+#include <linux/printk.h>
 #include <linux/netdevice.h>
+#include <linux/etherdevice.h>
+#include <linux/skbuff.h>
 
 static struct net_device *yogo_netdev;
 
+static void gen_packet(void) {
+    struct sk_buff *skb = NULL;
+    int pkt_len = 1000; // length of your received data
+    u8 data[1000] = {0};    // pointer to received data
+    struct net_device* dev = yogo_netdev;
+
+    skb = netdev_alloc_skb(dev, pkt_len);
+    if (!skb) {
+        return;
+    }
+
+    skb_put_data(skb, data, pkt_len);
+    skb->protocol = eth_type_trans(skb, dev);
+    skb->ip_summed = CHECKSUM_UNNECESSARY; // or CHECKSUM_NONE depending on your HW
+
+    netif_rx(skb); // hand off to the network stack
+    dev->stats.rx_packets++;
+    dev->stats.rx_bytes += pkt_len;
+}
 
 static int yogo_open(struct net_device* dev) {
     netif_start_queue(dev);
@@ -20,21 +37,22 @@ static int yogo_close(struct net_device* dev) {
 }
 
 static netdev_tx_t yogo_start_xmit(struct sk_buff *skb, struct net_device* dev) {
+    pr_info("got a new pkt to xmit\n");
     dev_kfree_skb(skb);
+    gen_packet();
     return NETDEV_TX_OK;
 }
-
 
 static const struct net_device_ops yogo_netdev_ops = {
     .ndo_open = yogo_open,
     .ndo_stop = yogo_close,
-    .ndo_start_xmit = yogo_start_xmit
+    .ndo_start_xmit = yogo_start_xmit,
 };
 
 static void setup_yogo_netdev(struct net_device* dev) {
     ether_setup(dev);
     dev->netdev_ops = &yogo_netdev_ops;
-    dev->flags |= IFF_NOARP;
+    // dev->flags |= IFF_NOARP;
     memset(dev->dev_addr, 0, ETH_ALEN);
 }
 

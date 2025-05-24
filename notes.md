@@ -32,7 +32,28 @@ But I can still see `e1000` in list of kernel modules.
 
 I looked at it a bit and the datasheet was not detailed enough in terms of the functional interface offered to the CPU, so I found a (somewhat generic e1000) software manual which seems more detailed. It is an official document from intel and it says that it applies to the `82540EM` hardware specifically.
 
-## Registering a linux network device
+## Registering a network device
 So I asked GPT for an example of this, specifically a linux module source which registers a new network device that does nothing. And the example essentially compiles.
 
 After building it, and installing the module, I can see in `ip a` an entry for `yogonet0` which means it actually works.
+
+## Requesting and Implementing network device ioctls
+So it looks like in my net device ops I can add a field `.ndo_do_ioctl`.
+But what fd should actually receive this ioctl from userspace?
+
+So far It's looking like either opening the relevant device in sysfs or opening a socket does not cause the ioctl to arrive at my kernel code.
+
+I will try to folow the impl of the network device registration in the core kernel.
+
+Starting from `net/core/dev.c: register_netdev`...
+After some digging I found the following in the docstring of the definition of the `struct net_device_ops`:
+```c
+/* ...
+ * int (*ndo_do_ioctl)(struct net_device *dev, struct ifreq *ifr, int cmd);
+ *	Old-style ioctl entry point. This is used internally by the
+ *	ieee802154 subsystem but is no longer called by the device
+ *	ioctl handler.
+ */
+```
+
+So I will be leaving this idea alone, and avoid ioctls.
