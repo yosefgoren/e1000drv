@@ -2,6 +2,7 @@ helko.ko
 Module.symvers
 *.order
 *.mod
+*.mod.c
 *.o
 *.cmd
 .vscode/settings.json
